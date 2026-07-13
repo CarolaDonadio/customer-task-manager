@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HelpDesk Bot N1</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app-layout">
+    <div class="container">
+        <h1><i class="fas fa-headset"></i> HelpDesk Bot N1</h1>
+        <p class="subtitle">Triage rápido de incidentes y ticketing</p>
+
+        <!-- 1. Datos del Usuario -->
+        <h2><i class="fas fa-user"></i> Datos del Usuario</h2>
+        <label for="nombre">Nombre del Usuario:</label>
+        <input type="text" id="nombre" placeholder="Ej. Juan Pérez">
+
+        <label for="legajo">ID de Empleado / Legajo:</label>
+        <input type="text" id="legajo" placeholder="Ej. 8832 (solo números)">
+
+        <!-- 2. Clasificación -->
+        <h2><i class="fas fa-folder-open"></i> Clasificación del Incidente</h2>
+        <label for="categoria">Categoría del problema:</label>
+        <select id="categoria">
+            <option value="">Selecciona una opción...</option>
+            <option value="contrasenas">Problemas de Contraseñas / Accesos</option>
+            <option value="red">Problemas de Red / Internet</option>
+            <option value="hardware">Problemas de Hardware (Monitor, Teclado...)</option>
+            <option value="software">Problemas de Software (Aplicaciones, SO)</option>
+        </select>
+
+        <label for="prioridad">Prioridad:</label>
+        <select id="prioridad">
+            <option value="Baja">Baja</option>
+            <option value="Media">Media</option>
+            <option value="Alta">Alta</option>
+        </select>
+
+        <!-- 3. Triage Dinámico (Troubleshooting) -->
+        <div id="seccion-triage" class="hidden">
+            <h2><i class="fas fa-cogs"></i> Pasos de Resolución Sugeridos</h2>
+            <div class="info-box">
+                <p><strong>Por favor, guíe al usuario con los siguientes pasos:</strong></p>
+                <ul id="pasos-lista"></ul>
+            </div>
+
+            <label for="descripcion">Descripción detallada del problema:</label>
+            <textarea id="descripcion" rows="4" placeholder="El usuario informa que no puede acceder a la VPN desde su casa..."></textarea>
+
+            <div class="radio-group">
+                <label><strong>¿Se solucionó el problema?</strong></label><br><br>
+                <input type="radio" id="sol-si" name="solucion" value="Sí" checked>
+                <label for="sol-si">Sí, problema resuelto</label><br>
+                <input type="radio" id="sol-no" name="solucion" value="No">
+                <label for="sol-no">No, requiere escalamiento</label>
+            </div>
+
+            <button id="btn-generar-ticket">Generar Ticket en el Sistema</button>
+        </div>
+
+        <!-- 4. Ticket Resultante -->
+        <div id="resultado-ticket" class="ticket-box hidden"></div>
+    </div>
+
+    <div class="sidebar">
+        <!-- 5. Dashboard de Estadísticas -->
+        <div id="seccion-dashboard" class="hidden">
+            <h2><i class="fas fa-chart-bar"></i> Estadísticas de Tickets</h2>
+            <div id="grafico-categorias"></div>
+        </div>
+
+        <!-- 6. Historial de Tickets -->
+        <div id="seccion-historial" class="hidden">
+            <div class="historial-header">
+                <h2><i class="fas fa-history"></i> Historial de Tickets Recientes</h2>
+                <div class="historial-controles">
+                    <button id="btn-exportar-csv">Exportar a CSV</button><button id="btn-limpiar-historial">Limpiar Historial</button>
+                </div>
+            </div>
+            <input type="search" id="historial-search" placeholder="Buscar por ID, usuario, legajo o categoría...">
+            <div id="historial-tickets"></div>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
