@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#e9edfb">
+    <title>HelpDesk | Mesa de ayuda local</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="page-shell">
+        <header class="topbar">
+            <a class="brand" href="#" aria-label="HelpDesk, inicio">
+                <span class="brand-mark"><i class="fas fa-headset" aria-hidden="true"></i></span>
+                <span>HelpDesk <strong>Local</strong></span>
+            </a>
+            <div class="topbar-actions">
+                <span class="topbar-status"><span class="status-dot"></span> Guardado en este dispositivo</span>
+                <label class="active-agent-label" for="active-agent">Agente</label>
+                <select id="active-agent" aria-label="Agente actual"></select>
+            </div>
+        </header>
+
+        <main class="workspace">
+            <div class="page-heading">
+                <div>
+                    <span class="eyebrow">MESA DE AYUDA · LOCAL</span>
+                    <h1>Centro de soporte</h1>
+                    <p class="subtitle">Organizá las solicitudes, asigná responsables y hacé seguimiento.</p>
+                </div>
+                <button id="new-ticket-button" class="button button-primary" type="button">
+                    <i class="fas fa-plus" aria-hidden="true"></i> Nuevo ticket
+                </button>
+            </div>
+
+            <section id="metrics" class="metrics-grid" aria-label="Resumen de tickets">
+                <article class="metric-card"><span class="metric-icon metric-blue"><i class="fas fa-inbox" aria-hidden="true"></i></span><span class="metric-label">Tickets activos</span><strong id="metric-active">0</strong></article>
+                <article class="metric-card"><span class="metric-icon metric-amber"><i class="fas fa-exclamation-circle" aria-hidden="true"></i></span><span class="metric-label">Prioridad alta o crítica</span><strong id="metric-urgent">0</strong></article>
+                <article class="metric-card"><span class="metric-icon metric-teal"><i class="fas fa-user-clock" aria-hidden="true"></i></span><span class="metric-label">Sin asignar</span><strong id="metric-unassigned">0</strong></article>
+                <article class="metric-card"><span class="metric-icon metric-green"><i class="fas fa-check-circle" aria-hidden="true"></i></span><span class="metric-label">Resueltos</span><strong id="metric-resolved">0</strong></article>
+                <article class="metric-card"><span class="metric-icon metric-red"><i class="fas fa-stopwatch" aria-hidden="true"></i></span><span class="metric-label">Fuera de objetivo</span><strong id="metric-overdue">0</strong></article>
+            </section>
+
+            <section class="app-layout">
+                <section class="container queue-card" aria-labelledby="queue-title">
+                    <div class="queue-heading">
+                        <div>
+                            <h2 id="queue-title">Cola de tickets</h2>
+                            <p id="ticket-count" class="muted">0 solicitudes</p>
+                        </div>
+                        <div class="queue-actions">
+                            <button id="backup-button" class="button button-subtle" type="button" title="Descargar copia de seguridad">
+                                Copia
+                            </button>
+                            <button id="restore-button" class="button button-subtle" type="button" title="Restaurar copia de seguridad">
+                                Restaurar
+                            </button>
+                            <input id="restore-file" class="hidden" type="file" accept=".json,application/json">
+                            <button id="refresh-button" class="button button-subtle" type="button" title="Actualizar tickets">
+                                Actualizar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="filters">
+                        <label class="search-wrap">
+                            <i class="fas fa-search" aria-hidden="true"></i>
+                            <span class="visually-hidden">Buscar tickets</span>
+                            <input id="filter-search" type="search" placeholder="Buscar ID, solicitante o descripción..." maxlength="100">
+                        </label>
+                        <label><span class="visually-hidden">Filtrar por estado</span>
+                            <select id="filter-status">
+                                <option value="">Todos los estados</option>
+                                <option>Abierto</option><option>En progreso</option><option>En espera</option><option>Resuelto</option><option>Cerrado</option>
+                            </select>
+                        </label>
+                        <label><span class="visually-hidden">Filtrar por prioridad</span>
+                            <select id="filter-priority">
+                                <option value="">Todas las prioridades</option>
+                                <option>Baja</option><option>Media</option><option>Alta</option><option>Crítica</option>
+                            </select>
+                        </label>
+                        <label><span class="visually-hidden">Filtrar por categoría</span>
+                            <select id="filter-category"><option value="">Todas las categorías</option></select>
+                        </label>
+                        <label><span class="visually-hidden">Filtrar por asignación</span>
+                            <select id="filter-assignee">
+                                <option value="">Todas las asignaciones</option>
+                                <option value="me">Asignados a mí</option>
+                                <option value="unassigned">Sin asignar</option>
+                            </select>
+                        </label>
+                        <label><span class="visually-hidden">Orden de tickets</span>
+                            <select id="filter-sort">
+                                <option value="priority">Prioridad y actividad</option>
+                                <option value="newest">Más recientes</option>
+                                <option value="oldest">Más antiguos</option>
+                                <option value="sla">Vencimiento más próximo</option>
+                            </select>
+                        </label>
+                        <button id="export-button" class="button button-subtle export-button" type="button">
+                            <i class="fas fa-download" aria-hidden="true"></i> CSV
+                        </button>
+                    </div>
+                    <div id="ticket-list" class="ticket-list" aria-live="polite"></div>
+                    <p id="queue-message" class="empty-state hidden"></p>
+                    <nav id="ticket-pagination" class="ticket-pagination hidden" aria-label="Paginación de tickets">
+                        <button id="previous-page" class="button button-subtle" type="button">Anterior</button>
+                        <span id="page-label"></span>
+                        <button id="next-page" class="button button-subtle" type="button">Siguiente</button>
+                    </nav>
+                </section>
+
+                <aside class="sidebar">
+                    <section class="side-card category-card">
+                        <div class="side-heading">
+                            <span class="side-icon"><i class="fas fa-chart-bar" aria-hidden="true"></i></span>
+                            <div><h2>Por categoría</h2><p>Tickets activos</p></div>
+                        </div>
+                        <div id="category-chart" class="category-chart"></div>
+                    </section>
+
+                    <section class="side-card admin-card">
+                        <div class="side-heading">
+                            <span class="side-icon"><i class="fas fa-users" aria-hidden="true"></i></span>
+                            <div><h2>Agentes locales</h2><p>Disponibles para asignar</p></div>
+                        </div>
+                        <form id="agent-form" class="agent-form">
+                            <label for="agent-name">Agregar agente</label>
+                            <div class="agent-add-row">
+                                <input id="agent-name" name="name" required maxlength="80" placeholder="Nombre del agente">
+                                <button class="button button-subtle" type="submit">Agregar</button>
+                            </div>
+                        </form>
+                        <div id="team-list" class="team-list"></div>
+                        <button id="clear-tickets-button" class="button button-danger" type="button">
+                            <i class="fas fa-trash-alt" aria-hidden="true"></i> Borrar todos los tickets
+                        </button>
+                    </section>
+
+                    <section class="side-card help-card">
+                        <span class="help-icon"><i class="fas fa-lightbulb" aria-hidden="true"></i></span>
+                        <h2>Un paso a la vez</h2>
+                        <p>Registrá el contexto, asigná un responsable y dejá notas para que el seguimiento sea claro.</p>
+                        <div class="help-note"><i class="fas fa-hdd" aria-hidden="true"></i> Los datos quedan guardados en este navegador.</div>
+                    </section>
+                </aside>
+            </section>
+        </main>
+
+        <footer class="site-footer"><span>HelpDesk · Local</span><span>Los datos se guardan en este dispositivo y navegador.</span></footer>
+    </div>
+
+    <dialog id="ticket-dialog" class="dialog ticket-dialog">
+        <form id="ticket-form" class="dialog-card">
+            <div class="dialog-heading">
+                <div><span class="eyebrow">REGISTRO DE SOLICITUD</span><h2>Nuevo ticket</h2></div>
+                <button class="button button-subtle" type="button" data-close-dialog="ticket-dialog">Cerrar</button>
+            </div>
+            <div class="field-grid">
+                <div class="field"><label for="requester-name">Nombre del solicitante *</label><input id="requester-name" name="usuario" required maxlength="120" autocomplete="name"></div>
+                <div class="field"><label for="requester-id">Legajo / ID *</label><input id="requester-id" name="legajo" required maxlength="40"></div>
+                <div class="field"><label for="requester-email">Correo</label><input id="requester-email" name="email" type="email" maxlength="254"></div>
+                <div class="field"><label for="requester-department">Departamento</label><input id="requester-department" name="departamento" maxlength="100"></div>
+                <div class="field"><label for="ticket-category">Categoría *</label><select id="ticket-category" name="categoria" required></select></div>
+                <div class="field"><label for="ticket-priority">Prioridad *</label><select id="ticket-priority" name="prioridad"><option>Media</option><option>Alta</option><option>Crítica</option><option>Baja</option></select></div>
+                <div class="field field-wide"><label for="ticket-description">Descripción del problema *</label><textarea id="ticket-description" name="descripcion" rows="4" required maxlength="10000" placeholder="Qué ocurre, desde cuándo, impacto y mensajes de error..."></textarea></div>
+                <div class="field field-wide"><label for="ticket-assignee">Asignar a</label><select id="ticket-assignee" name="asignado_a"></select></div>
+            </div>
+            <div id="triage-box" class="info-box hidden"><strong>Guía de diagnóstico</strong><ul id="triage-steps"></ul></div>
+            <div class="dialog-actions"><button class="button button-subtle" type="button" data-close-dialog="ticket-dialog">Cancelar</button><button class="button button-primary" type="submit">Crear ticket</button></div>
+        </form>
+    </dialog>
+
+    <dialog id="detail-dialog" class="dialog detail-dialog">
+        <section class="dialog-card">
+            <div class="dialog-heading">
+                <div><span id="detail-id" class="eyebrow"></span><h2 id="detail-title">Detalle del ticket</h2></div>
+                <button class="button button-subtle" type="button" data-close-dialog="detail-dialog">Cerrar</button>
+            </div>
+            <div id="detail-content" class="detail-content"></div>
+            <form id="ticket-update-form" class="ticket-update-form">
+                <div class="field-grid">
+                    <div class="field"><label for="detail-requester-name">Solicitante</label><input id="detail-requester-name" name="usuario" required maxlength="120"></div>
+                    <div class="field"><label for="detail-requester-id">Legajo / ID</label><input id="detail-requester-id" name="legajo" required maxlength="40"></div>
+                    <div class="field"><label for="detail-requester-email">Correo</label><input id="detail-requester-email" name="email" type="email" maxlength="254"></div>
+                    <div class="field"><label for="detail-department">Departamento</label><input id="detail-department" name="departamento" maxlength="100"></div>
+                    <div class="field"><label for="detail-category">Categoría</label><select id="detail-category" name="categoria"></select></div>
+                    <div class="field field-wide"><label for="detail-description">Descripción del problema</label><textarea id="detail-description" name="descripcion" rows="3" required maxlength="10000"></textarea></div>
+                    <div class="field"><label for="detail-status">Estado</label><select id="detail-status" name="estado"><option>Abierto</option><option>En progreso</option><option>En espera</option><option>Resuelto</option><option>Cerrado</option></select></div>
+                    <div class="field"><label for="detail-priority">Prioridad</label><select id="detail-priority" name="prioridad"><option>Baja</option><option>Media</option><option>Alta</option><option>Crítica</option></select></div>
+                    <div class="field field-wide"><label for="detail-assignee">Agente asignado</label><select id="detail-assignee" name="asignado_a"></select></div>
+                    <div class="field field-wide"><label for="detail-resolution">Resolución <span class="optional">(obligatoria para resolver o cerrar)</span></label><textarea id="detail-resolution" name="resolucion" rows="3" maxlength="10000"></textarea></div>
+                </div>
+                <div class="dialog-actions"><button class="button button-primary" type="submit">Guardar cambios</button></div>
+            </form>
+            <section class="comments-section">
+                <h3>Notas internas</h3>
+                <div id="comment-list" class="comment-list"></div>
+                <form id="comment-form" class="comment-form">
+                    <label class="visually-hidden" for="comment-body">Agregar nota interna</label>
+                    <textarea id="comment-body" required maxlength="5000" rows="3" placeholder="Compartí contexto útil para el seguimiento..."></textarea>
+                    <button class="button button-subtle" type="submit">Agregar nota</button>
+                </form>
+            </section>
+            <section class="activity-section">
+                <h3>Actividad</h3>
+                <ol id="activity-list" class="activity-list"></ol>
+            </section>
+            <div class="dialog-actions dialog-danger-actions">
+                <button id="delete-ticket-button" class="button button-danger" type="button"><i class="fas fa-trash-alt" aria-hidden="true"></i> Eliminar ticket</button>
+            </div>
+        </section>
+    </dialog>
+
+    <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+    <script src="script.js"></script>
+</body>
+</html>
